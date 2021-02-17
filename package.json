@@ -1,0 +1,23 @@
+{
+  "name": "employee_mangement_system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "emplyoeetracker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordanrantucci/Employee_Mangement_System.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jordanrantucci/Employee_Mangement_System/issues"
+  },
+  "homepage": "https://github.com/jordanrantucci/Employee_Mangement_System#readme",
+  "dependencies": {
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
+}

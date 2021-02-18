@@ -1,5 +1,6 @@
 const mysql = require('mysql')
 const inquirer = require('inquirer')
+const cTable = require('console.table')
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -36,25 +37,31 @@ const runSearch = () => {
         })
         .then((answer) => {
             switch (answer.action) {
-                case 'Find songs by artist':
-                    artistSearch();
+                case 'View All Employees':
+                    viewEmployees();
                     break;
 
-                case 'Find all artists who appear more than once':
-                    multiSearch();
+                case 'View All Employees By Department':
+                    viewDepartment();
                     break;
 
-                case 'Find data within a specific range':
-                    rangeSearch();
+                case 'View All Employees By Manager':
+                    viewManager();
                     break;
 
-                case 'Search for a specific song':
-                    songSearch();
+                case 'Add Employee':
+                    addEmployee();
                     break;
 
-                case 'Find artists with a top song and top album in the same year':
-                    songAndAlbumSearch();
+                case 'Remove Employee':
+                    removeEmployee();
                     break;
+
+                case 'Update Employee Role':
+                    upateEmployeeRole();
+
+                case 'Update Employee Manager':
+                    updateEmployeeManager();
 
                 default:
                     console.log(`Invalid action: ${answer.action}`);
@@ -62,3 +69,24 @@ const runSearch = () => {
             }
         });
 };
+ 
+const viewEmployees = () => {
+    connection.query('SELECT id, first_name, last_name, FROM employee INNER JOIN role ON title, department_id, salary OUTER JOIN employee ON manager_id'
+     (err,res) => {
+        if(err) throw err
+        res.foreEach((employees) => {
+            const table = cTable.getTable([
+                {
+                    id: `${employees.id}`,
+                    first_name: `${employee.first_name}`,
+                    last_name: `${employee.last_name}`,
+                    role_id: `${employees.role_id}`,
+                    manager_id: `${employees.manager_id}`
+                }
+            ])
+        }
+    }
+    console.table([
+
+    ])
+}

@@ -71,8 +71,7 @@ const runSearch = () => {
 };
  
 const viewEmployees = () => {
-    connection.query('SELECT id, first_name, last_name, FROM employee INNER JOIN role ON title, department_id, salary OUTER JOIN employee ON manager_id'
-     (err,res) => {
+    connection.query('SELECT * From employees', (err,res) => {
         if(err) throw err
         res.foreEach((employees) => {
             const table = cTable.getTable([
@@ -84,9 +83,35 @@ const viewEmployees = () => {
                     manager_id: `${employees.manager_id}`
                 }
             ])
+    console.log(table)
         }
     }
-    console.table([
 
-    ])
+const viewDepartment = () =>{
+
 }
+
+const viewManager = () => {
+
+}
+
+const addEmployee = () => {
+
+}
+
+const removeEmployee = () => {
+
+}
+
+const upateEmployeeRole = () => {
+
+}
+
+const updateEmployeeManager = () => {
+
+}
+
+connection.connect((err) => {
+    if(err) throw err
+    promptUser()
+})

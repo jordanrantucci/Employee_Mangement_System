@@ -71,44 +71,80 @@ const runSearch = () => {
 };
  
 const viewEmployees = () => {
-    connection.query('SELECT * From employees', (err,res) => {
+    const query ='SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, role.salary, contact(m.first_name, " ", m.last_name), AS manager FROM employees e LEFT join EMPLOYEES M on e.manager_id = m.id LEFT OUTER JOIN role ON e.role_id = role.is INNER JOIN department ON role.department_id = department.id'
+    connection.query(query, (err,res) => {
         if(err) throw err
-        res.foreEach((employees) => {
-            const table = cTable.getTable([
-                {
-                    id: `${employees.id}`,
-                    first_name: `${employee.first_name}`,
-                    last_name: `${employee.last_name}`,
-                    role_id: `${employees.role_id}`,
-                    manager_id: `${employees.manager_id}`
-                }
-            ])
-    console.log(table)
-        }
+       console.table(res)
+       promptUser()
+        })
     }
 
 const viewDepartment = () =>{
+    const query = 'SELECT employees.id, employees.first_name, employees.last_name, role.totle FROM employees LEFT OUTER JOIN role ON employees.role_id = role.id'
+    connection.query(query, (err,res) => {
+        if (err) throw err
+        console.table(res)
+    })
 
 }
 
 const viewManager = () => {
+    const query = 'SELECT * employee'
+    connection.query(query, (err,res) => {
+        if (err) throw err
+        console.table(res)
+    })
 
 }
 
 const addEmployee = () => {
-
+    const query = 'SELECT title FROM role'
+    connection.query(query, (err, res) => {
+        if (err) throw err
+        inquirer
+            .prompt([{
+                name: "addFirstName",
+                type: "input",
+                message: "What is the New Employee's First Name?"
+            },
+            {
+                name:"addLastName",
+                type: "input",
+                message: "What is the New Employee's Last Name?"
+            },
+            {
+                name: "NewEmployeeRole",
+                type: "list",
+                message: "What is the New Employee's Title?",
+                choices: res
+            }
+        ])
+        console.table(res)
+    })
 }
 
 const removeEmployee = () => {
-
+    const query = 'SELECT * employee'
+    connection.query(query, (err, res) => {
+        if (err) throw err
+        console.table(res)
+    })
 }
 
 const upateEmployeeRole = () => {
-
+    const query = 'SELECT * employee'
+    connection.query(query, (err, res) => {
+        if (err) throw err
+        console.table(res)
+    })
 }
 
 const updateEmployeeManager = () => {
-
+    const query = 'SELECT * employee'
+    connection.query(query, (err, res) => {
+        if (err) throw err
+        console.table(res)
+    })
 }
 
 connection.connect((err) => {

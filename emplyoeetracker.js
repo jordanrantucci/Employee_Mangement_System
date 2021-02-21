@@ -9,21 +9,18 @@ const connection = mysql.createConnection({
 
     user: 'root',
 
-    password: '',
+    password: 'ThinkPad$1989',
     database: 'employee_tracker_db',
 });
 
-connection.connect((err) => {
-    if (err) throw err;
-    runSearch();
-});
+
 
 // need to change all the cases to be relevent to the actual homework questions
 const runSearch = () => {
     inquirer
         .prompt({
             name: 'action',
-            type: 'rawlist',
+            type: 'list',
             message: 'What would you like to do?',
             choices: [
                 'View All Employees',
@@ -32,7 +29,8 @@ const runSearch = () => {
                 'Add Employee',
                 'Remove Employee',
                 'Update Employee Role',
-                'Update Employee Manager'
+                'Update Employee Manager',
+                'Exit'
             ],
         })
         .then((answer) => {
@@ -63,29 +61,44 @@ const runSearch = () => {
                 case 'Update Employee Manager':
                     updateEmployeeManager();
 
+                case 'Exit':
+                    connection.end()
+                    break;
+
                 default:
                     console.log(`Invalid action: ${answer.action}`);
                     break;
             }
         });
-};
- 
+
+    }; 
+
 const viewEmployees = () => {
-    const query ='SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, role.salary, contact(m.first_name, " ", m.last_name), AS manager FROM employees e LEFT join EMPLOYEES M on e.manager_id = m.id LEFT OUTER JOIN role ON e.role_id = role.is INNER JOIN department ON role.department_id = department.id'
+    const query ='SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, role.salary, concat(m.first_name, " ", m.last_name) AS manager FROM employee e LEFT JOIN employee m ON e.manager_id = m.id LEFT OUTER JOIN role ON e.role_id = role.id INNER JOIN department ON role.department_id = department.id'
     connection.query(query, (err,res) => {
         if(err) throw err
        console.table(res)
-       promptUser()
+       runSearch()
         })
     }
 
-const viewDepartment = () =>{
-    const query = 'SELECT employees.id, employees.first_name, employees.last_name, role.totle FROM employees LEFT OUTER JOIN role ON employees.role_id = role.id'
-    connection.query(query, (err,res) => {
+const viewDepartment = () => {
+        inquirer.prompt([
+        {
+            type: 'list',
+            message: 'Which department would you like to view?',
+            choices: ['Sales', 'Engineering', 'Finance', 'Legal'],
+            name: 'chooseDepartment'
+        }
+     ])
+    .then(answer => {
+    const query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee LEFT OUTER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id WHERE ?'
+    connection.query(query, {name: answer.chooseDepartment}, (err,res) => {
         if (err) throw err
         console.table(res)
+        runSearch()
+        })
     })
-
 }
 
 const viewManager = () => {
@@ -93,6 +106,7 @@ const viewManager = () => {
     connection.query(query, (err,res) => {
         if (err) throw err
         console.table(res)
+        runSearch()
     })
 
 }
@@ -120,6 +134,7 @@ const addEmployee = () => {
             }
         ])
         console.table(res)
+        runSearch()
     })
 }
 
@@ -128,6 +143,7 @@ const removeEmployee = () => {
     connection.query(query, (err, res) => {
         if (err) throw err
         console.table(res)
+        runSearch()
     })
 }
 
@@ -136,6 +152,7 @@ const upateEmployeeRole = () => {
     connection.query(query, (err, res) => {
         if (err) throw err
         console.table(res)
+        runSearch()
     })
 }
 
@@ -144,10 +161,11 @@ const updateEmployeeManager = () => {
     connection.query(query, (err, res) => {
         if (err) throw err
         console.table(res)
+        runSearch()
     })
 }
 
 connection.connect((err) => {
     if(err) throw err
-    promptUser()
+    runSearch()
 })

@@ -102,7 +102,7 @@ const viewDepartment = () => {
 }
 
 const viewManager = () => {
-    const query = 'SELECT * employee'
+    const query = 'SELECT e.id, e.first_name, e.last_name, role.title, department.name AS department, role.salary, concat(m.first_name, " ", m.last_name) AS manager FROM employee e LEFT JOIN employee m ON e.manager_id = m.id LEFT OUTER JOIN role ON e.role_id INNER JOIN department ON role.department_id = department.id ORDER BY manager'
     connection.query(query, (err,res) => {
         if (err) throw err
         console.table(res)
@@ -112,33 +112,75 @@ const viewManager = () => {
 }
 
 const addEmployee = () => {
-    const query = 'SELECT title FROM role'
+    const titleArray = []
+    const query = 'SELECT role.id, role.title FROM role'
     connection.query(query, (err, res) => {
         if (err) throw err
+        for(i=0;i<res.length; i++){
+            titleArray.push(res[i].title)
+        }
         inquirer
             .prompt([{
+                type: "input",
+                message: "What is the New Employee's First Name?",
                 name: "addFirstName",
-                type: "input",
-                message: "What is the New Employee's First Name?"
+                validate: function(input){
+                    if(input === ""){
+                        console.log("Please enter a first name")
+                        return false
+                    }
+                    else {
+                        return true
+                    }
+                }
             },
             {
+                type: "input",
+                message: "What is the New Employee's Last Name?",
                 name:"addLastName",
-                type: "input",
-                message: "What is the New Employee's Last Name?"
+                validate: function (input) {
+                    if (input === "") {
+                        console.log("Please enter a last name")
+                        return false
+                    }
+                    else {
+                        return true
+                    }
+                }    
             },
             {
-                name: "NewEmployeeRole",
                 type: "list",
                 message: "What is the New Employee's Title?",
-                choices: res
+                choices: titleArray,
+                name: "NewEmployeeRole",
             }
         ])
-        console.table(res)
-        runSearch()
+        .then ((answer) => {
+            console.log("employee added")
+            const query = 'Select role.id, role.title FROM role'
+            connection.query(query, (err, role) => {
+                if (err) throw err
+                
+                const titleID = null
+                for(i=0;i<role.length;i++){
+                    if (answer.NewEmployeeRole == role[i].title){
+                        titleID = role[i].titleID
+                    }
+                }
+                const query = 'INSERT INTO employee (first_name, last_name, role_id) VALUES (?)'
+                const values = [answer.AddFirstName, answer.addLastName, titleID]
+                connection.query(query, [values], (err,res) => {
+                    if (err) throw err
+                console.table(res)
+                runSearch()
+                 })
+            })
+         })
     })
 }
 
-const removeEmployee = () => {
+
+removeEmployee = () => {
     const query = 'SELECT * employee'
     connection.query(query, (err, res) => {
         if (err) throw err

@@ -10,7 +10,7 @@ VALUES ("Sales Lead", 100000, 1), ("Salesperson", 80000, 2),("Lead Engineer", 15
 ("Lawyer", 190000, 2);
 
 INSERT into employee (first_name, last_name, role_id, manager_id) 
-VALUES ("Bruce", "Banner", 1, null), ("Peter", "Parker", 6, 1), ("Pepper", "Potts", 2, null);
+VALUES ("Bruce", "Banner", 1, null), ("Peter", "Parker", 2, 1), ("Pepper", "Potts", 3, 2);
 
 SELECT * FROM employee;
 SELECT * fROM role;

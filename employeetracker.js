@@ -29,7 +29,8 @@ const runSearch = () => {
                 'Add Employee',
                 'Remove Employee',
                 'Update Employee Role',
-                'Update Employee Manager',
+                'Add Department',
+                'Add Role',
                 'Exit'
             ],
         })
@@ -55,11 +56,17 @@ const runSearch = () => {
                     removeEmployee();
                     break;
 
-                // case 'Update Employee Role':
-                //     upateEmployeeRole();
+                case 'Update Employee Role':
+                    upateEmployeeRole();
+                    break;
 
-                // case 'Update Employee Manager':
-                //     updateEmployeeManager();
+                case 'Update Department':
+                    updateDepartment();
+                    break;
+
+                case 'Add Role':
+                    addRole();
+                    break;
 
                 case 'Exit':
                     connection.end()
@@ -83,11 +90,14 @@ const viewEmployees = () => {
     }
 
 const viewDepartment = () => {
+    const query = 'SELECT name FROM department'
+    connection.query(query, (err,res) =>{
+        if (err) throw err
         inquirer.prompt([
         {
             type: 'list',
             message: 'Which department would you like to view?',
-            choices: ['Sales', 'Engineering', 'Finance', 'Legal'],
+            choices: res,
             name: 'chooseDepartment'
         }
      ])
@@ -97,6 +107,7 @@ const viewDepartment = () => {
         if (err) throw err
         console.table(res)
         runSearch()
+            })
         })
     })
 }
@@ -322,22 +333,103 @@ removeEmployee = () => {
 }
 
 const upateEmployeeRole = () => {
-    const query = 'SELECT * employee'
+    const employeeArray = []
+    const query = 'SELECT concat(first_name, " ", last_name) AS employee_name FROM employee'
     connection.query(query, (err, res) => {
         if (err) throw err
-        console.table(res)
-        runSearch()
-    })
-}
+        for(i=0;i<res.length;i++){
+            employeeArray.push(res[i].employee_name)
+        }
+        console.log(employeeArray)
+        const roleArray = []
+        const query2 = 'SELECT role.id, role.title FROM role'
+        connection.query(query2, (err, res2) => {
+            if (err) throw err
+            for(i=0;i<res2.length;i++){
+                roleArray.push(res2[i].title)
+            }
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        message: "Which employee's role do you want to change?",
+                        choices: employeeArray,
+                        name: 'whichEmployee'
+                    }
+                ])
+                .then((res) => {
+                    inquirer
+                        .prompt([
+                            {
+                                type: 'list',
+                                message: "What is "+res.whichEmployee+"'s new role?",
+                                choices: roleArray,
+                                name: 'whichRole'
+                            }
+                        ])
+                        .then((answer) => {
+                    console.log("it worked")
+                    const query3 = 'SELECT role.id, role.title FROM role'
+                    connection.query(query3, (err, role) => {
+                        if (err) throw err
+                        
+                        // set variables for ID
+                        let roleID = null
 
-const updateEmployeeManager = () => {
-    const query = 'SELECT * employee'
-    connection.query(query, (err, res) => {
-        if (err) throw err
-        console.table(res)
-        runSearch()
+                        // get the role ID of the employee's new role
+                        for(i=0;i<role.length;i++){
+                            if(answer.whichRole == role[i].title){
+                                roleID = role[i].id
+                                console.log(roleID)
+                            }
+                        }
+                        const query4 = 'SELECT concat(first_name, " ", last_name) AS employee_name FROM employee'
+                        connection.query(query4, (err, response) => {
+                            if (err) throw err
+                            for(i=0;i<employeeArray.length;i++){
+                                if(res.whichEmployee == response[i].employee_name){
+                                    console.log("this works")
+                                    console.log(response[i].employee_name)
+                                    const employeeNameArray = res.whichEmployee.split(" ")
+                                    console.log(employeeNameArray)
+
+                                    const query5 = 'SELECT employee.id, employee.first_name, employee.last_name FROM employee'
+                                    let employeeID = null
+                                    connection.query(query5, (err, res2) => {
+                                        if (err) throw err
+                                        for(i=0;i<employeeArray.length;i++){
+                                        if (employeeNameArray[0] === res2[i].first_name){
+                                            console.log("name matched - employee ID obtained")
+                                            console.log(res2[i].first_name)
+                                            if(employeeNameArray[1] === res2[i].last_name){
+                                                console.log(res2[i].last_name)
+                                                console.log(res2[i].id)
+                                                employeeID = res2[i].id
+
+                                                const query6 = 'UPDATE employee SET ? WHERE?'
+                                                connection.query(query6, [
+                                                {role_id: roleID,},
+                                                {id: employeeID}
+                                                ], (err) => {
+                                                    if (err) throw err
+                                                    console.log("Employee role is updated!")
+                                                    runSearch()
+                                                    })
+                                                }
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    })
+                })
+            })
+        })
     })
-}
+}                                      
+
+
 
 connection.connect((err) => {
     if(err) throw err

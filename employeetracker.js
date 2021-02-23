@@ -51,9 +51,9 @@ const runSearch = () => {
                     addEmployee();
                     break;
 
-                // case 'Remove Employee':
-                //     removeEmployee();
-                //     break;
+                case 'Remove Employee':
+                    removeEmployee();
+                    break;
 
                 // case 'Update Employee Role':
                 //     upateEmployeeRole();

@@ -245,11 +245,79 @@ const addEmployee = () => {
 }
 
 removeEmployee = () => {
-    const query = 'SELECT * employee'
+    const employeeArray = []
+
+    const query = 'SELECT concat(first_name, " ", last_name) AS employee_name FROM employee'
     connection.query(query, (err, res) => {
         if (err) throw err
-        console.table(res)
-        runSearch()
+        for(i=0;i<res.length;i++){
+            employeeArray.push(res[i].employee_name)
+            console.log(res.employee_name)
+        }
+        console.log(employeeArray)
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    message: "Which employee would you like to remove?",
+                    choices: employeeArray,
+                    name: 'whichEmployee'
+                }
+            ])
+            .then ((res) => {
+                inquirer
+                    .prompt([
+                        {
+                            type: 'confirm',
+                            message: "Would you like to remove "+res.whichEmployee+"?",
+                            name: 'confirmRemove'
+                         }
+                    ])
+                .then ((answer) => {
+                    if(answer.confirmRemove){
+                        console.log("confirmed the removal")
+                        const query2 = 'SELECT concat(first_name, " ", last_name) AS employee_name FROM employee'
+                        connection.query(query2, (err, response) => {
+                            if (err) throw err
+                            console.log("checking if this works")
+                            for(i=0;i<employeeArray.length;i++){
+                                if(res.whichEmployee == response[i].employee_name){
+                                console.log("this also works")
+                                console.log(response[i].employee_name)
+                                const employeeNameArray = res.whichEmployee.split(" ")
+                                console.log(employeeNameArray)
+
+                                const query3 = 'SELECT employee.id, employee.first_name, employee.last_name FROM employee'
+                                let employeeID = null
+                                connection.query(query3, (err, res2) => {
+                                    if (err) throw err
+                                    for(i=0;i<employeeArray.length;i++){
+                                    if (employeeNameArray[0] === res2[i].first_name){
+                                        console.log("name matched - Employee ID obtained")
+                                        console.log(res2[i].first_name)
+                                        if(employeeNameArray[1] === res2[i].last_name){
+                                            console.log(res2[i].last_name)
+                                            console.log(res2[i].id)
+                                            employeeID = res2[i].id
+                                            }
+                                        }    
+                                    }
+                                    const query4 = 'DELETE FROM employee WHERE ?'
+                                    connection.query(query4,{ id: employeeID }, (err) => {
+                                        if (err) throw err
+                                        console.log('Employee was successfully removed.')
+                                        runSearch()
+                                    })
+                                })
+                            }
+                        }
+                    })
+                }
+                else {
+                    runSearch()
+                }
+            })
+        })    
     })
 }
 

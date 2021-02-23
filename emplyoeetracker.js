@@ -51,15 +51,15 @@ const runSearch = () => {
                     addEmployee();
                     break;
 
-                case 'Remove Employee':
-                    removeEmployee();
-                    break;
+                // case 'Remove Employee':
+                //     removeEmployee();
+                //     break;
 
-                case 'Update Employee Role':
-                    upateEmployeeRole();
+                // case 'Update Employee Role':
+                //     upateEmployeeRole();
 
-                case 'Update Employee Manager':
-                    updateEmployeeManager();
+                // case 'Update Employee Manager':
+                //     updateEmployeeManager();
 
                 case 'Exit':
                     connection.end()
@@ -116,11 +116,24 @@ const addEmployee = () => {
     const query = 'SELECT role.id, role.title FROM role'
     connection.query(query, (err, res) => {
         if (err) throw err
-        for(i=0;i<res.length; i++){
+        for(i=0;i<res.length;i++){
             titleArray.push(res[i].title)
         }
+        const managerArray = []
+        const queryM = 'SELECT e.id, e.first_name, e.last_name, concat(m.first_name, " ", m.last_name) AS manager FROM employee e LEFT JOIN employee m ON e.manager_id = m.id'
+        connection.query(queryM, (err, res) => {
+            if (err) throw err
+            for(i=0;i<res.length; i++){
+                if(res[i].manager !== null){
+                managerArray.push(res[i].manager)
+            }
+        }
+
+        managerArray.unshift('--')
+
         inquirer
-            .prompt([{
+            .prompt([
+                {
                 type: "input",
                 message: "What is the New Employee's First Name?",
                 name: "addFirstName",
@@ -152,7 +165,13 @@ const addEmployee = () => {
                 type: "list",
                 message: "What is the New Employee's Title?",
                 choices: titleArray,
-                name: "NewEmployeeRole",
+                name: "NewEmployeeRole"
+            },
+            {
+                type: 'list',
+                message: "Who is the new employee's manager?",
+                choices: managerArray,
+                name: 'newEmployeeManager'
             }
         ])
         .then ((answer) => {
@@ -161,24 +180,69 @@ const addEmployee = () => {
             connection.query(query, (err, role) => {
                 if (err) throw err
                 
-                const titleID = null
+                // set variables for ID
+                let titleID = null
+                // get the role ID of the new employee's title
                 for(i=0;i<role.length;i++){
                     if (answer.NewEmployeeRole == role[i].title){
-                        titleID = role[i].titleID
+                        titleID = role[i].id
                     }
                 }
-                const query = 'INSERT INTO employee (first_name, last_name, role_id) VALUES (?)'
-                const values = [answer.AddFirstName, answer.addLastName, titleID]
-                connection.query(query, [values], (err,res) => {
+
+                const queryM = 'SELECT e.id, e.first_name, e.last_name, concat(m.first_name, " ", m.last_name) AS manager FROM employee e LEFT JOIN employee m ON e.manager_id = m.id'
+                connection.query(queryM, (err, res) => {
                     if (err) throw err
-                console.table(res)
-                runSearch()
-                 })
-            })
-         })
+                
+                    // set variable for ID
+                    let managerID = null
+                    let managerName = null
+                    let managerNameArray = null
+                    console.log(answer.newEmployeeManager)
+                    console.log(res[1].manager)
+
+                    // look in the database for the manager's name. match the name with the manager's employee.id
+                    // if answer.newEmployeeManager == manager, mangerID, manager.id
+                    for (i=0;i<managerArray.length;i++){
+                        if (res[i].manager == answer.newEmployeeManager){
+                            console.log("this is working")
+                            console.log(res[i].manager)
+                            managerName = res[i].manager
+                            managerNameArray = managerName.split(" ")
+                        }
+                    }
+                    console.log(managerNameArray)
+                    
+
+                    const queryE = 'SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id FROM employee'
+                    connection.query(queryE, (err, res) => {
+                        if (err) throw err
+                        console.log(managerNameArray)
+
+                        for(i=0; i<res.length;i++){
+                            if (managerNameArray[0] === res[i].first_name){
+                                console.log("manager check worked")
+                                console.log(res[i].first_name)
+                                if(managerNameArray[1] === res[i].last_name){
+                                    console.log(res[i].last_name)
+                                    console.log(res[i].id)
+                                    managerID = res[i].id
+                                }
+                            }
+                        }
+                        const query = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) values (?)'
+                        const values = [answer.addFirstName, answer.addLastName, titleID, managerID]
+                        connection.query(query, [values], (err, res) => {
+                            if (err) throw err
+                            console.table("New Employee added!")
+                            runSearch()
+                            })
+                        })
+                    })
+                })
+            })   
+        })
     })
 }
-
 
 removeEmployee = () => {
     const query = 'SELECT * employee'

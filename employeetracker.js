@@ -29,8 +29,8 @@ const runSearch = () => {
                 'Add Employee',
                 'Remove Employee',
                 'Update Employee Role',
-                'Add Department',
-                'Add Role',
+                'Add New Department',
+                'Add New Role',
                 'Exit'
             ],
         })
@@ -60,12 +60,12 @@ const runSearch = () => {
                     upateEmployeeRole();
                     break;
 
-                case 'Update Department':
-                    updateDepartment();
+                case 'Add New Department':
+                    addNewDepartment();
                     break;
 
-                case 'Add Role':
-                    addRole();
+                case 'Add New Role':
+                    addNewRole();
                     break;
 
                 case 'Exit':
@@ -429,7 +429,73 @@ const upateEmployeeRole = () => {
     })
 }                                      
 
+addNewDepartment = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Enter the new department name.',
+            name: 'newDepartmentName'
+        }
+    ])
+    .then ((answer) => {
+        const query = 'INSERT INTO department SET ?'
+        connection.query(query, {name: answer.newDepartmentName}, (err) => {
+            if (err) throw err
+            console.log("Succesfully added a new department!")
+            runSearch()
+        })
+    })
+}
 
+addNewRole = () => {
+    const query = 'SELECT name FROM department'
+    connection.query(query, (err, response) => {
+        if (err) throw err
+        const deptNameArray = response
+        inquirer
+            .prompt([
+            {
+                type: 'input',
+                message: 'Enter the new role title.',
+                name: 'newRoleTitle'
+            },
+            {
+                type: 'input',
+                message: "Enter the new role's salary",
+                name: 'newRoleSalary'
+            },
+            {
+                type: 'list',
+                message: "choose the new role's department.",
+                choices: deptNameArray,
+                name: 'newRoleDepartment'
+            }
+        ])
+        .then ((answer) => {
+            let deptName = answer.newRoleDepartment
+
+            console.log(deptName)
+
+            const query2 = 'SELECT * FROM department'
+            const departmentID = []
+            connection.query(query2, (err, response) => {
+                if (err) throw err
+                for(i=0;i<deptNameArray.length;i++){
+                    if(answer.newRoleDepartment == response[i].name){
+                        departmentID.push(response[i].id)
+                    }
+                }
+
+                const query3 = 'INSERT INTO role SET ?'
+                connection.query(query3, {title: answer.newRoleTitle, salary: answer.newRoleSalary, department_id: departmentID}, (err) => {
+                    if (err) throw err
+                    console.log("Successfully added new role!")
+                    runSearch()
+                })
+            })
+        })
+    })
+}
 
 connection.connect((err) => {
     if(err) throw err

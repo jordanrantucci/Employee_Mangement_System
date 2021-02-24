@@ -9,7 +9,7 @@ const connection = mysql.createConnection({
 
     user: 'root',
 
-    password: 'ThinkPad$1989',
+    password: process.env.DB_PASS,
     database: 'employee_tracker_db',
 });
 

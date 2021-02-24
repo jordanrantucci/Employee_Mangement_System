@@ -53,7 +53,7 @@ This project uses express to save and store the information.
 See Contact Section
 
 # Future
-Update the styling to personalize the notebook
+Be able to remove and change managers.  I would love to have time to play with chalk to add colors to the display.
 
 # Contact
 

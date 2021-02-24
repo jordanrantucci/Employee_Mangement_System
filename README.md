@@ -33,7 +33,7 @@ node.js, NPM express, MySQL, console.table, inquirer
 The project is used to keep an orgainzed list of employees with their roles, salaries and managers.
 
 My Tests
-![Alt Text](public/assets/demo.gif)
+![Alt Text](assets/demo.gif)
 
 
 
